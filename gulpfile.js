@@ -7,6 +7,8 @@ const svgmin                        = require('gulp-svgmin'); // npm install gul
 const inject                        = require('gulp-inject'); // npm install gulp-inject --save-dev
 const path                          = require('path'); // installed with npm install gulp -g
 const autoprefixer                  = require('gulp-autoprefixer'); // npm install --save-dev gulp-autoprefixer
+const ts                            = require('gulp-typescript'); // npm install --save-dev typescript gulp@4.0.0 gulp-typescript
+const tsProject = ts.createProject('tsconfig.json');
 
 gulp.task('svgstore', function () {
     const svgs = gulp
@@ -56,6 +58,12 @@ gulp.task('less', function () {
         .pipe(dest('./'));
 });
 
+gulp.task('ts', function () {
+    return tsProject.src()
+        .pipe(tsProject())
+        .js.pipe(gulp.dest('dist'));
+});
+
 gulp.task('serve', function () {
     // Serve files from the root of this project
     browserSync.init({
@@ -66,6 +74,7 @@ gulp.task('serve', function () {
     gulp.watch("./assets/styles/**/*.less").on("change", series("less"));
     gulp.watch("./main.css").on("change", browserSync.reload);
     gulp.watch("./index.html").on("change", browserSync.reload);
+    gulp.watch("./scripts/**.ts").on("change", series("less", browserSync.reload));
 });
 
-gulp.task('default', series(parallel('less', 'svgstore'), 'serve'));
+gulp.task('default', series(parallel('less', 'svgstore', 'ts'), 'serve'));
